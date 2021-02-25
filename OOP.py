@@ -20,7 +20,7 @@ class Student:
         y = 0
         for i in self.grades:
             y += (sum(self.grades[i]) / len(self.grades[i]))
-        return (round(y / len(self.grades), 2))
+        return round(y / len(self.grades), 2)
 
     def __str__(self):
         self.average_score = self.calc_average()
@@ -49,8 +49,7 @@ class Mentor:
 
 class Lecturer(Mentor):
     def __init__(self, name, surname):
-        self.name = name
-        self.surname = surname
+        super().__init__(name, surname)
         self.courses_attached = []
         self.lection_grades = {}
 
@@ -80,8 +79,7 @@ class Lecturer(Mentor):
 
 class Reviewer(Mentor):
     def __init__(self, name, surname):
-        self.name = name
-        self.surname = surname
+        super().__init__(name, surname)
         self.courses_attached = []
 
     def rate_hw(self, student, course, grade):
