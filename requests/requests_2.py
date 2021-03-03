@@ -19,7 +19,7 @@ class YaUploader:
 
 
 if __name__ == '__main__':
-    uploader = YaUploader("AgAAAAAA6fCKAADLW5ySBte9PUfbgJ5nN8R7VTo")
+    uploader = YaUploader("token")
     result = uploader.upload("python_up.jpg")
 
 
