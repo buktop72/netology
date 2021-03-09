@@ -1,5 +1,15 @@
 import requests
 from pprint import pprint
+import logging
+from datetime import datetime
+import logging
+REQUEST_STATUS_CODE = 200
+logging.basicConfig(
+    level=logging.DEBUG,
+    format = "%(asctime)s - %(levelname)s - %(message)s",
+    filename= 'error.log'
+)
+
 
 class VkUser:
     url = 'https://api.vk.com/method/photos.get'
@@ -23,8 +33,11 @@ class VkUser:
             'access_token': self.token,
             'v': '5.130'
         }
+        logging.debug('Start user_info')
         info = requests.get(url, params=params)
+
         return str(info.json()['response'][0]['first_name'] + info.json()['response'][0]['last_name'])
+
 
     def get_url_photos(self):
         res = requests.get(self.url, params=self.params)
@@ -32,6 +45,7 @@ class VkUser:
         img_url_list = []
         img_url_dict = {}
         x = 2
+        logging.debug('Start get_url_photos')
         for i in result['response']['items']:
             size = 0
             # pprint(i)
@@ -51,6 +65,7 @@ class VkUser:
         return img_url_dict
 
     def list_dir(self):
+        logging.debug('Start list_dir')
         url = 'https://cloud-api.yandex.net/v1/disk/resources'
         params = {'path' : '/'}
         with open('ya_token.txt') as f:
@@ -63,6 +78,7 @@ class VkUser:
         return ls_dir
 
     def up_photos(self, dict, dir, list_dir):
+        logging.debug('Start up_photos')
         if dir not in ls_dir:
             url = 'https://cloud-api.yandex.net/v1/disk/resources'
             params = {"path": dir}
@@ -79,11 +95,15 @@ class VkUser:
             params = {"path": path}
             headers = {"Authorization": self.token}
             resp = requests.get(url, params=params, headers=headers)
-            print(resp.status_code)
+            logging.debug(resp.status_code)
             url_up = resp.json()['href']
             image = requests.get(dict[i])
             up_file = requests.put(url_up, image.content)
-            print(up_file.status_code)
+            logging.debug(up_file.status_code)
+            # file = dir + '_' + str(i)
+            print(f"файл {dir + '_' + str(i)} загружен в папку {dir}")
+
+
 
 vk_client = VkUser('552934290')
 dir_name = vk_client.user_info()
