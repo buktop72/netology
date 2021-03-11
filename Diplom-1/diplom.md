@@ -1,5 +1,3 @@
-!['python'](https://yandex.ru/images/search?pos=2&from=tabbar&img_url=https%3A%2F%2Fblog.hyperiondev.com%2Fwp-content%2Fuploads%2F2017%2F11%2FPython_logo.jpg&isize=small&text=Python&rpt=simage)
-
 # Дипломный проект «Резервное копирование» первого блока «Основы языка программирования Python»
 
 ## Задание:
