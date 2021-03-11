@@ -52,8 +52,9 @@ class VkUser:
             size = 0
             if len(json_list) <= count-1:
                 for j in i['sizes']:
-                    if j['height'] > size:
-                        size = j['height']
+                    if j['height']  * j['width'] > size:
+                        size = j['height']  * j['width']
+                        print(size)
                         img_url = j['url']
                         json_dict['size'] = j['type']
                         json_dict['url'] = img_url
@@ -135,6 +136,6 @@ class VkUser:
 vk_client = VkUser('552934290')
 dir_name = vk_client.user_info()
 # Сохранить указанное количество фотографий(по умолчанию 5):
-img_dict = vk_client.get_url_photos(4)
+img_dict = vk_client.get_url_photos(10)
 ls_dir = vk_client.list_dir()
 vk_client.up_photos(img_dict, dir_name, ls_dir)
