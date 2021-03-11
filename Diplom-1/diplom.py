@@ -40,7 +40,7 @@ class VkUser:
         # pprint(info.json())
         return str(info.json()['response'][0]['first_name'] + info.json()['response'][0]['last_name'])
 
-    def get_url_photos(self):
+    def get_url_photos(self, count = 5):
         logging.debug('Start get_url_photos')
         res = requests.get(self.url, params=self.params)
         result = res.json()
@@ -51,20 +51,24 @@ class VkUser:
         x = 2
         for i in result['response']['items']:
             size = 0
-            for j in i['sizes']:
-                if j['height'] > size:
-                    size = j['height']
-                    img_url = j['url']
-                    json_dict['size'] = j['type']
-                    json_dict['url'] = img_url
-            key = str(i["likes"]['count'])
-            key_list.append(key)
-            if key_list.count(key) > 1:
-                json_dict['name'] = f"{key}-{x}.jpg"
-                x += 1
+            print('длина', len(json_list))
+            if len(json_list) <= count-1:
+                for j in i['sizes']:
+                    if j['height'] > size:
+                        size = j['height']
+                        img_url = j['url']
+                        json_dict['size'] = j['type']
+                        json_dict['url'] = img_url
+                key = str(i["likes"]['count'])
+                key_list.append(key)
+                if key_list.count(key) > 1:
+                    json_dict['name'] = f"{key}-{x}.jpg"
+                    x += 1
+                else:
+                    json_dict['name'] = f"{key}.jpg"
+                json_list.append(json_dict.copy())
             else:
-                json_dict['name'] = f"{key}.jpg"
-            json_list.append(json_dict.copy())
+                break
         return json_list
 
     def list_dir(self):
