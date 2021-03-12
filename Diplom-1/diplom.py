@@ -1,16 +1,11 @@
 import requests
-import logging
+# import logging
 import json
+import datetime
 from pprint import pprint
+import my_logger
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    filename='debug.log',
-    filemode='w'
-)
-logger = logging.getLogger()
-
+logger = my_logger.get_logger(__name__)
 
 class VkUser:
     url = 'https://api.vk.com/method/photos.get'
@@ -37,8 +32,8 @@ class VkUser:
         }
         info = requests.get(url, params=params)
         if info.status_code:
-            print('Информация о пльзователе получена!')
-        logger.info(f'Получении информации о пользователе <requests.get> - {info.status_code}')
+            print('Информация о пользователе получена!')
+        logger.info(f'Получение информации о пользователе <requests.get> - {info.status_code}')
         return str(info.json()['response'][0]['first_name'] +'_'+ info.json()['response'][0]['last_name'])
 
     # Получаем url фото (список словарей с ключами "name", "size", "url")
@@ -78,11 +73,11 @@ class VkUser:
             self.token = f.read().strip()
         headers = {"Authorization": self.token}
         resp = requests.get(url, params=params, headers=headers)
-        logger.info(f'получаем список существующих файлов и папок на YaDisk <requests.get> - {resp.status_code}')
+        logger.info(f'Получение списка существующих файлов и папок на YaDisk <requests.get> - {resp.status_code}')
         ls_dir = []
         for i in resp.json()['_embedded']['items']:
             ls_dir.append(i['name'])
-        logging.info(f"Получено {len(ls_dir)} файлов!")
+        logger.info(f"Получено {len(ls_dir)} файлов!")
         return ls_dir
 
     # загрузка файлов на YaDisk
@@ -93,6 +88,7 @@ class VkUser:
         # запись json-файла:
         dict_json = {} # словарь с ключами "name", "size"
         list_dict_json = [] # список словарей dict_json
+        # создание json-файла:
         for i in dict:
             dict_json['file_name'] = i['name']
             dict_json['size'] = i['size']
@@ -109,11 +105,11 @@ class VkUser:
             resp = requests.put(url, params=params, headers=headers)
             logger.info(f'Запрос на создание папки на YaDisk <requests.put> - {resp.status_code}')
             if resp.status_code:
-                logger.info(f"каталог {dir} создан!")
-                print(f"каталог {dir} создан!")
+                logger.info(f"каталог '{dir}' создан!")
+                print(f"каталог '{dir}' создан!")
         else:
             print(f"Каталог {dir} уже существует!")
-            logging.info(f"Каталог {dir} уже существует!")
+            logger.info(f"Каталог {dir} уже существует!")
             exit()
         # Загрузка файлов на YaDisk, в созданную папку:
         url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
@@ -123,7 +119,7 @@ class VkUser:
             params = {"path": path}
             headers = {"Authorization": self.token}
             resp = requests.get(url, params=params, headers=headers)
-            logger.info(f'Получение ссылки для закачки файла <requests.get> - {resp.status_code}')
+            logger.info(f'Получение ссылки для закачки файла на YaDisk <requests.get> - {resp.status_code}')
             url_up = resp.json()['href']
             # Загрузка файла на YaDisk:
             image = requests.get(i['url'])
@@ -131,7 +127,7 @@ class VkUser:
             logger.info(f'Загрузка файла на YaDisk <requests.put> - {resp.status_code}')
             if up_file.status_code:
                 print(f"файл '{i['name']}' загружен в папку '{dir}'")
-                logging.info(f"файл '{i['name']}' загружен в папку '{dir}'")
+                logger.info(f"файл '{i['name']}' загружен в папку '{dir}'")
 
 
 vk_client = VkUser('552934290')
