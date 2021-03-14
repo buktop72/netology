@@ -142,7 +142,7 @@ class VkUser:
                 logger.info(f"файл '{i['name']}' загружен в папку '{dir}'")
 
 # id 552934290
-# экземпляр класса VkUser. id - обязательный параметр, album - не обязательный,
+# экземпляр класса VkUser. id - обязательный параметр, album - необязательный,
 # по умолчанию - 'profile' (варианты: 'wall', 'saved')
 vk_client = VkUser('552934290')
 dir_name = vk_client.user_info()
