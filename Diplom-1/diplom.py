@@ -1,8 +1,6 @@
 import requests
-# import logging
 import json
-import datetime
-from pprint import pprint
+#from pprint import pprint
 import my_logger
 
 logger = my_logger.get_logger(__name__)
@@ -10,14 +8,15 @@ logger = my_logger.get_logger(__name__)
 class VkUser:
     url = 'https://api.vk.com/method/photos.get'
 
-    def __init__(self, id):
+    def __init__(self, id, album = 'profile'):
         with open('token.txt') as f:
             self.token = f.read().strip()
+        self.album_id = album
         self.id = id
         self.params = {
             'owner_id': self.id,
             'access_token': self.token,
-            'album_id': 'profile',
+            'album_id': self.album_id, #'wall', #'profile',
             'rev': '0',
             'extended': '1',
             'v': '5.130'
@@ -31,10 +30,15 @@ class VkUser:
             'v': '5.130'
         }
         info = requests.get(url, params=params)
-        if info.status_code:
-            print('Информация о пользователе получена!')
-        logger.info(f'Получение информации о пользователе <requests.get> - {info.status_code}')
-        return str(info.json()['response'][0]['first_name'] +'_'+ info.json()['response'][0]['last_name'])
+        # Проверка валидности ID:
+        if "error" in info.json().keys():
+            print('ошибка: ', info.json()['error']['error_msg'])
+            logger.error(info.json()['error']['error_msg'])
+            exit()
+        else:
+            print('Информация о пользователе', info.json()['response'][0]['id'], 'получена!')
+            logger.info(f'Получение информации о пользователе <requests.get> - {info.status_code}')
+            return str(info.json()['response'][0]['first_name'] +'_'+ info.json()['response'][0]['last_name'])
 
     # Получаем url фото (список словарей с ключами "name", "size", "url")
     def get_url_photos(self, count = 5):
@@ -44,25 +48,33 @@ class VkUser:
         json_dict = {}
         json_list = []
         like_list = [] # список лайков
-        for i in result['response']['items']:
-            size = 0
-            if len(json_list) <= count-1:
-                for j in i['sizes']:
-                    if j['height']  * j['width'] > size:
-                        size = j['height']  * j['width']
-                        img_url = j['url']
-                        json_dict['size'] = j['type']
-                        json_dict['url'] = img_url
-                like = str(i["likes"]['count'])
-                like_list.append(like)
-                if like_list.count(like) > 1:
-                    json_dict['name'] = f"{like}-{i['date']}.jpg"
+        if 'error' in result.keys(): # проверка наличия прав на альбом
+            print(result['error']['error_msg'])
+            logger.error(result['error']['error_msg'])
+            exit()
+        if result['response']['count'] > 0: # провека наличия фото в альбоме
+            for i in result['response']['items']:
+                size = 0
+                if len(json_list) <= count-1:
+                    for j in i['sizes']:
+                        if j['height']  * j['width'] > size:
+                            size = j['height']  * j['width']
+                            img_url = j['url']
+                            json_dict['size'] = j['type']
+                            json_dict['url'] = img_url
+                    like = str(i["likes"]['count'])
+                    like_list.append(like)
+                    if like_list.count(like) > 1:
+                        json_dict['name'] = f"{like}-{i['date']}.jpg"
+                    else:
+                        json_dict['name'] = f"{like}.jpg"
+                    json_list.append(json_dict.copy())
                 else:
-                    json_dict['name'] = f"{like}.jpg"
-                json_list.append(json_dict.copy())
-            else:
-                break
-        print(f"найдено {len(json_list)} фотографий!")
+                    break
+        else:
+            print('в альбоме нет фото!')
+            exit()
+        print(f"найдено {len(json_list)} фото!")
         return json_list
 
     # получаем список существующих файлов и папок на YaDisk
@@ -129,10 +141,12 @@ class VkUser:
                 print(f"файл '{i['name']}' загружен в папку '{dir}'")
                 logger.info(f"файл '{i['name']}' загружен в папку '{dir}'")
 
-
+# id 552934290
+# экземпляр класса VkUser. id - обязательный параметр, album - не обязательный,
+# по умолчанию - 'profile' (варианты: 'wall', 'saved')
 vk_client = VkUser('552934290')
 dir_name = vk_client.user_info()
 # Сохранить указанное количество фотографий(по умолчанию 5):
-img_dict = vk_client.get_url_photos(5)
+img_dict = vk_client.get_url_photos(115)
 ls_dir = vk_client.list_dir()
 vk_client.up_photos(img_dict, dir_name, ls_dir)
