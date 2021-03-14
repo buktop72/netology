@@ -77,6 +77,7 @@ class VkUser:
         print(f"найдено {len(json_list)} фото!")
         return json_list
 
+class YaDisk:
     # получаем список существующих файлов и папок на YaDisk
     def list_dir(self):
         url = 'https://cloud-api.yandex.net/v1/disk/resources'
@@ -141,12 +142,11 @@ class VkUser:
                 print(f"файл '{i['name']}' загружен в папку '{dir}'")
                 logger.info(f"файл '{i['name']}' загружен в папку '{dir}'")
 
-# id 552934290
-# экземпляр класса VkUser. id - обязательный параметр, album - необязательный,
+
+vk_client = VkUser('552934290') # экземпляр класса VkUser. id - обязательный параметр, album - не обязательный,
 # по умолчанию - 'profile' (варианты: 'wall', 'saved')
-vk_client = VkUser('552934290')
-dir_name = vk_client.user_info()
-# Сохранить указанное количество фотографий(по умолчанию 5):
-img_dict = vk_client.get_url_photos(115)
-ls_dir = vk_client.list_dir()
-vk_client.up_photos(img_dict, dir_name, ls_dir)
+dir_name = vk_client.user_info() # получаем имя папки "Имя_Фамилия"
+img_dict = vk_client.get_url_photos(115) # Сохранить указанное количество фотографий(по умолчанию 5):
+up_disk =YaDisk() # экземпляр класса YaDisk
+ls_dir = up_disk.list_dir() # список существующих папок и файлов
+up_disk.up_photos(img_dict, dir_name, ls_dir) # загрузка файлов на диск
